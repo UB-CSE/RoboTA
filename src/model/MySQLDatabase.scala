@@ -4,10 +4,10 @@ import java.sql.{Connection, DriverManager}
 
 class MySQLDatabase extends Database {
 
-  val url = "jdbc:mysql://mysql/twitchbot?autoReconnect=true"
+  val url = "jdbc:mysql://localhost/twitchbot?autoReconnect=true"
 
-  val username: String = sys.env("DB_USERNAME")
-  val password: String = sys.env("DB_PASSWORD")
+  val username: String = "root" //sys.env("DB_USERNAME")
+  val password: String = "123456" // sys.env("DB_PASSWORD")
 
   println(username)
   println(password)

@@ -1,6 +1,8 @@
 package model
 
-class TwitchBot(database: Database = new TestDatabase) {
+import akka.actor.{Actor, ActorRef}
+
+class TwitchBot(webSocketServer: ActorRef, database: Database = new TestDatabase) extends Actor {
 
   /**
    * Called when a user enters "!q <question_text>" in the chat
@@ -21,7 +23,7 @@ class TwitchBot(database: Database = new TestDatabase) {
     val question: Question = new Question(displayId, questionText, submitter)
 
     database.addQuestion(question)
-
+    webSocketServer ! questions("")
   }
 
   /**
@@ -41,16 +43,7 @@ class TwitchBot(database: Database = new TestDatabase) {
       theQuestion.addUpvote(voter)
       database.updateQuestion(theQuestion)
     }
-  }
-
-  /**
-   * Returns all unanswered questions sorted by decreasing number of upvotes
-   *
-   * @param streamId The id of the stream
-   * @return The questions
-   */
-  def questions(streamId: String): List[Question] = {
-    database.unansweredQuestions().sortBy(_.numberOfUpvotes()).reverse
+    webSocketServer ! this.questions("")
   }
 
   def questionAnswered(displayId: String): Unit = {
@@ -66,6 +59,17 @@ class TwitchBot(database: Database = new TestDatabase) {
     }
   }
 
+  /**
+   * Returns all unanswered questions sorted by decreasing number of upvotes
+   *
+   * @param streamId The id of the stream
+   * @return The questions
+   */
+  def questions(streamId: String): List[Question] = {
+    database.unansweredQuestions().sortBy(_.numberOfUpvotes()).reverse
+  }
+
+
 
   def getNextAvailableDisplayId(): String = {
     val unansweredQuestionsByDisplayIdentification = this.database.unansweredQuestions().sortBy(_.displayId)
@@ -75,5 +79,12 @@ class TwitchBot(database: Database = new TestDatabase) {
       i += 1
     }
     i.toString
+  }
+
+  override def receive: Receive = {
+    case question: NewQuestion => this.questionSubmitted(question.streamId, question.questionText, question.submitter)
+    case upvote: Upvote => this.upvote(upvote.displayId, upvote.voter)
+    case answered: QuestionAnswered => this.questionAnswered(answered.displayId)
+    case GetQuestions => this.questions("")
   }
 }

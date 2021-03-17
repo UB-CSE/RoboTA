@@ -10,6 +10,12 @@
     </properties>
     <dependencies>
 
+        <dependency>
+            <groupId>com.github.andyglow</groupId>
+            <artifactId>websocket-scala-client_2.13</artifactId>
+            <version>0.3.0</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-http -->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
@@ -140,6 +146,7 @@
     </dependencies>
 
     <build>
+        <sourceDirectory>src</sourceDirectory>
         <plugins>
             <!-- https://java2blog.com/no-main-manifest-attribute/ -->
             <plugin>

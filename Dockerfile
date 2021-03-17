@@ -1,12 +1,8 @@
 FROM ubuntu:18.04
 
 
-#C++ Setup
 RUN apt-get update
-RUN apt-get install -y gcc
-RUN apt-get install -y make
-RUN apt-get install -y build-essential
-RUN apt-get install -y libcunit1-dev libcunit1-doc libcunit1
+RUN apt-get install -y wget
 
 
 #Java 15 Setup
@@ -39,9 +35,13 @@ RUN apt-get install -y sbt
 #Maven Setup
 RUN apt-get install -y maven
 
+# Build the app
+ENV HOME /root
+WORKDIR /root
 COPY . .
 RUN mvn package
 
+# Download the wait command to wait for MySQL to run
 ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.2.1/wait /wait
 RUN chmod +x /wait
 

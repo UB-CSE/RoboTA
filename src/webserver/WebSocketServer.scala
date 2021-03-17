@@ -1,13 +1,15 @@
 package webserver
 
+import akka.actor.Actor
 import com.corundumstudio.socketio.listener.ConnectListener
 import com.corundumstudio.socketio.{Configuration, SocketIOClient, SocketIOServer}
+import model.Question
 
-class WebSocketServer {
+class WebSocketServer extends Actor{
 
   val config: Configuration = new Configuration {
     setHostname("0.0.0.0")
-    setPort(8080)
+    setPort(8082)
   }
 
   val server: SocketIOServer = new SocketIOServer(config)
@@ -15,14 +17,18 @@ class WebSocketServer {
   server.addConnectListener(new ConnectionListener())
 
   server.start()
-}
 
-object WebSocketServer{
-
-  def main(args: Array[String]): Unit = {
-    new WebSocketServer()
+  override def receive: Receive = {
+    case questions: List[Question] => server.getBroadcastOperations.sendEvent("messages", questions.foldLeft("")((agg: String, question: Question) => agg + "<br/>" + question.toString))
   }
 }
+
+//object WebSocketServer{
+//
+//  def main(args: Array[String]): Unit = {
+//    new WebSocketServer()
+//  }
+//}
 
 class ConnectionListener() extends ConnectListener {
   override def onConnect(client: SocketIOClient): Unit = {
