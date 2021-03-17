@@ -1,0 +1,18 @@
+Twitch API
+-Connect to the Twitch chat API
+
++Docker Support
++Modify Maven to build a jar
++Add a Dockerfile
+
+Add a database
+-MySQL
+--2 tables (Questions, Upvotes)
+-docker-compose
+
+The Web Stuff
+-Are we using web sockets?
+-Host everything
+
+Deployment
+-Make it live

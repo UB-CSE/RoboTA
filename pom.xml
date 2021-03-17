@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0">
     <groupId>edu.buffalo.cse</groupId>
-    <artifactId>cse116</artifactId>
+    <artifactId>twitchbot</artifactId>
     <modelVersion>4.0.0</modelVersion>
     <url>http://maven.apache.org</url>
     <version>0.0.1</version>
@@ -24,20 +24,19 @@
             <version>2.6.11</version>
         </dependency>
 
-
-        <!-- https://mvnrepositoryepository.com/artifact/com.typesafe.akka/akka-actor -->
-<!--        <dependency>-->
-<!--            <groupId>com.typesafe.akka</groupId>-->
-<!--            <artifactId>akka-actor_2.13</artifactId>-->
-<!--            <version>2.6.11</version>-->
-<!--        </dependency>-->
-
         <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-testkit -->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-testkit_2.13</artifactId>
             <version>2.6.11</version>
         </dependency>
+
+        <!-- https://mvnrepositoryepository.com/artifact/com.typesafe.akka/akka-actor -->
+        <!--        <dependency>-->
+        <!--            <groupId>com.typesafe.akka</groupId>-->
+        <!--            <artifactId>akka-actor_2.13</artifactId>-->
+        <!--            <version>2.6.11</version>-->
+        <!--        </dependency>-->
 
         <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-actor-typed -->
         <dependency>
@@ -139,4 +138,59 @@
         </dependency>
 
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- https://java2blog.com/no-main-manifest-attribute/ -->
+            <plugin>
+                <!-- Build an executable JAR -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>webserver.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.scala-tools</groupId>
+                <artifactId>maven-scala-plugin</artifactId>
+                <version>2.15.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- https://maven.apache.org/plugins/maven-shade-plugin/examples/executable-jar.html -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>reference.conf</resource>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
