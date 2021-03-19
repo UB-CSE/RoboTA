@@ -34,8 +34,10 @@ class TwitchAPI(twitchBot: ActorRef) extends Actor {
             checkForBotCommands(message)
             // sender() ! "PRIVMSG #hartloff :" + "Hello " + message.username + "! Thank you for saying \"" + message.messageText + "\""
           }else if (rawMessage.contains("USERSTATE")){
-            val messageUsername:String = TwitchAPI.parseChatMessage(rawMessage).username
-            if(messageUsername.toLowerCase().contains("priest")){
+            val messageUsername:List[String] = rawMessage.split(";").toList
+            var placeholder:String = ""
+            val Recollecting= for (information <- messageUsername if information.contains("display-name")) placeholder = information.split("=")(1)
+            if(placeholder.toLowerCase().contains("priest")){
               sender() !"PRIVMSG #hartloff :" + messageUsername + " has has arrived"
 
               //your welcome priest
