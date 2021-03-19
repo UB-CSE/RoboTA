@@ -33,6 +33,16 @@ class TwitchAPI(twitchBot: ActorRef) extends Actor {
             val message = TwitchAPI.parseChatMessage(rawMessage)
             checkForBotCommands(message)
             // sender() ! "PRIVMSG #hartloff :" + "Hello " + message.username + "! Thank you for saying \"" + message.messageText + "\""
+          }else if (rawMessage.contains("USERSTATE")){
+            val messageUsername:String = TwitchAPI.parseChatMessage(rawMessage).username
+            if(messageUsername.toLowerCase().contains("priest")){
+              sender() !"PRIVMSG #hartloff :" + messageUsername + " has has arrived"
+
+              //your welcome priest
+              //This is a joke pull request but I will love to see priest reaction
+              //I have no idea if this works or not it should work base on my understanding of how this bot is working as
+            }
+
           }
       }
     }
@@ -48,6 +58,7 @@ class TwitchAPI(twitchBot: ActorRef) extends Actor {
   override def receive: Receive = {
     case _ =>
   }
+
 
 
   def removeCommandFromMessage(message: String): String = {

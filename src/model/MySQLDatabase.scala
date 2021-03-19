@@ -56,6 +56,7 @@ class MySQLDatabase extends Database {
 
 
   override def addQuestion(question: Question): Unit = {
+
     reconnect()
 //    this.database += question.uniqueId -> question
   }
