@@ -1,5 +1,5 @@
 
-const socket = io.connect("http://localhost:8082", {transports: ['websocket']});
+const socket = io.connect();
 
 socket.on('messages', function (event) {
     document.getElementById("my_div").innerHTML = event;

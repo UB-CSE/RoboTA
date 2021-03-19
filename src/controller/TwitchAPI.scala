@@ -7,12 +7,20 @@ import model._
 
 object TwitchAPI{
 
+  def escapeHTML(input: String): String = {
+    input.replace("&", "&amp;")
+      .replace("<", "&lt;")
+      .replace(">", "&gt;")
+  }
+
   def parseChatMessage(rawMessage: String): ChatMessage = {
     // Extract the username from index 1 until the first '!'
-    val username: String = rawMessage.substring(1, rawMessage.indexOf('!'))
+    var username: String = rawMessage.substring(1, rawMessage.indexOf('!'))
+    username = escapeHTML(username)
 
     // Extract everything after the second ':' assuming the first char in a ':'
-    val messageText: String = rawMessage.substring(rawMessage.drop(1).indexOf(':') + 2)
+    var messageText: String = rawMessage.substring(rawMessage.drop(1).indexOf(':') + 2)
+    messageText = escapeHTML(messageText)
 
     new ChatMessage(username, messageText)
   }
@@ -52,7 +60,9 @@ class TwitchAPI(twitchBot: ActorRef) extends Actor {
     val client = WebsocketClient[String](Uri("wss://irc-ws.chat.twitch.tv:443"), handler)
     val socket = client.open()
 
-    socket ! "PASS oauth:???"
+    val twitchOauthToken = sys.env("TWITCH_OAUTH")
+
+    socket ! "PASS " + twitchOauthToken
     socket ! "NICK Botloff"
     socket ! "JOIN #hartloff"
   }

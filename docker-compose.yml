@@ -1,5 +1,9 @@
 version: '3.3'
 services:
+  nginx:
+    build: ./nginx
+    ports:
+      - '8123:80'
   mysql:
     image: mysql
     environment:
@@ -9,9 +13,8 @@ services:
       MYSQL_PASSWORD: 'changeme'
   app:
     build: .
-    ports:
-      - '8313:8080'
     environment:
       WAIT_HOSTS: mysql:3306
       DB_USERNAME: 'sqluser'
       DB_PASSWORD: 'changeme'
+      TWITCH_OAUTH: 'oauth:____'
