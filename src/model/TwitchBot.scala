@@ -87,4 +87,5 @@ class TwitchBot(webSocketServer: ActorRef, database: Database = new TestDatabase
     case answered: QuestionAnswered => this.questionAnswered(answered.displayId)
     case GetQuestions => this.questions("")
   }
+
 }
