@@ -1,7 +1,7 @@
 package tests
 
 import controller.{ChatMessage, TwitchAPI}
-import model.{Database, Question, TestDatabase, TwitchBot}
+import model.Question
 import org.scalatest.FunSuite
 
 class TestParsingTwitchMessages extends FunSuite {

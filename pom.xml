@@ -146,7 +146,6 @@
     </dependencies>
 
     <build>
-        <sourceDirectory>src</sourceDirectory>
         <plugins>
             <!-- https://java2blog.com/no-main-manifest-attribute/ -->
             <plugin>
@@ -200,9 +199,9 @@
         </plugins>
         <resources>
             <resource>
-                <directory>resources</directory>
+                <directory>src/main/resources</directory>
 
-                <targetPath>resources/.env</targetPath>
+                <targetPath>src/main/resources/.env</targetPath>
             </resource>
         </resources>
     </build>

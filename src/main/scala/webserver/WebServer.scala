@@ -23,6 +23,8 @@ class WebServer(implicit val system: ActorSystem[Nothing]) {
 
   val router: Route = concat(indexRouter, staticRouter)
 
+  println("test", sys.env("WEB_LISTEN").toInt)
+
   val bindingFuture: Future[Http.ServerBinding] =
     if (sys.env("WEB_LISTEN") != "" && sys.env("WEB_LISTEN").toInt > 0) {
       Http().newServerAt("0.0.0.0", sys.env("WEB_LISTEN").toInt).bind(router)

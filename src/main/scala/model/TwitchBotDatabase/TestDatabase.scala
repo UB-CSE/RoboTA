@@ -1,6 +1,8 @@
-package model
+package model.TwitchBotDatabase
 
-class TestDatabase extends Database {
+import model.Question
+
+class TestDatabase extends TwitchBotContract {
 
   var database: Map[Int, Question] = Map() // uniqueId -> Question
 

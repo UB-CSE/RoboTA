@@ -10,6 +10,8 @@ class WebSocketServer extends Actor{
   val config: Configuration = new Configuration {
     setHostname("0.0.0.0")
 
+    println("WEBSOCKET_LISTEN", sys.env("WEBSOCKET_LISTEN"))
+
     if (sys.env("WEBSOCKET_LISTEN") != "" && sys.env("WEBSOCKET_LISTEN").toInt > 0) {
       setPort(sys.env("WEBSOCKET_LISTEN").toInt)
     } else {
@@ -24,7 +26,11 @@ class WebSocketServer extends Actor{
   server.start()
 
   override def receive: Receive = {
-    case questions: List[Question] => server.getBroadcastOperations.sendEvent("messages", questions.foldLeft("")((agg: String, question: Question) => agg + "<br/>" + question.toString))
+    case questions: List[Question] =>
+      server.getBroadcastOperations.sendEvent(
+        "messages",
+        questions.foldLeft("")((agg: String, question: Question) => agg + "<br/>" + question.toString)
+      )
   }
 }
 

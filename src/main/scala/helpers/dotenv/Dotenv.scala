@@ -7,6 +7,9 @@ import scala.util.{Failure, Success, Try}
 object Dotenv {
   // To load .env file to the Environmental Variables for development
   def loadEnv(envFilePath: String = ".env"): Unit = {
+    val resources = getClass.getResource(".")
+    println(resources)
+
     var envLines: List[String] = Try(Source.fromResource(envFilePath).getLines().toList) match {
       case Success(lines) => lines
       case Failure(e) => {

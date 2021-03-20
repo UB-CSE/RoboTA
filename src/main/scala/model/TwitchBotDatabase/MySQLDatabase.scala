@@ -1,30 +1,19 @@
-package model
+package model.TwitchBotDatabase
 
-import java.sql.{Connection, DriverManager}
+import config.DatabaseConn
+import model.Question
+import java.sql.{Connection}
 
-class MySQLDatabase extends Database {
 
-  val url = "jdbc:mysql://localhost/twitchbot?autoReconnect=true"
+class MySQLDatabase extends TwitchBotContract {
 
-  val username: String = "root" //sys.env("DB_USERNAME")
-  val password: String = "123456" // sys.env("DB_PASSWORD")
-
-  println(username)
-  println(password)
-
-  var connection: Connection = DriverManager.getConnection(url, username, password)
+  var connection: Connection = DatabaseConn.getDBConnection()
 
   initializeDatabase()
   test()
 
-  def reconnect(): Unit = {
-    if(this.connection.isClosed) {
-      this.connection = DriverManager.getConnection(url, username, password)
-    }
-  }
-
   def initializeDatabase(): Unit = {
-    reconnect()
+    DatabaseConn.reconnect()
     val statement = connection.createStatement()
     statement.execute("DROP TABLE IF EXISTS questions")
     statement.execute("CREATE TABLE IF NOT EXISTS questions (displayId TEXT, questionText TEXT, submitter TEXT, answered BOOLEAN, uniqueId INT NOT NULL PRIMARY KEY AUTO_INCREMENT)")
@@ -32,7 +21,7 @@ class MySQLDatabase extends Database {
   }
 
   def test(): Unit = {
-    reconnect()
+    DatabaseConn.reconnect()
     val statement = connection.prepareStatement("INSERT INTO questions (displayId, questionText, submitter, answered) VALUES (?, ?, ?, ?)")
     statement.setString(1, "1")
     statement.setString(2, "How ya'll doin?")
@@ -57,22 +46,22 @@ class MySQLDatabase extends Database {
 
   override def addQuestion(question: Question): Unit = {
 
-    reconnect()
+    DatabaseConn.reconnect()
 //    this.database += question.uniqueId -> question
   }
 
   override def updateQuestion(question: Question): Unit = {
-    reconnect()
+    DatabaseConn.reconnect()
 //    this.database += question.uniqueId -> question
   }
 
   override def unansweredQuestions(): List[Question] = {
-    reconnect()
+    DatabaseConn.reconnect()
 //    this.database.values.toList.filter(!_.answered)
     null
   }
   override def questions(): List[Question] = {
-    reconnect()
+    DatabaseConn.reconnect()
 //    this.database.values.toList
     null
   }
