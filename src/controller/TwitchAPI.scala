@@ -4,22 +4,31 @@ import akka.actor.{Actor, ActorRef}
 import com.github.andyglow.websocket.{WebsocketClient, WebsocketHandler}
 import com.github.andyglow.websocket.util.Uri
 import model._
+import model.command._
 
 object TwitchAPI{
 
+  def escapeHTML(input: String): String = {
+    input.replace("&", "&amp;")
+      .replace("<", "&lt;")
+      .replace(">", "&gt;")
+  }
+
   def parseChatMessage(rawMessage: String): ChatMessage = {
     // Extract the username from index 1 until the first '!'
-    val username: String = rawMessage.substring(1, rawMessage.indexOf('!'))
+    var username: String = rawMessage.substring(1, rawMessage.indexOf('!'))
+    username = escapeHTML(username)
 
     // Extract everything after the second ':' assuming the first char in a ':'
-    val messageText: String = rawMessage.substring(rawMessage.drop(1).indexOf(':') + 2)
+    var messageText: String = rawMessage.substring(rawMessage.drop(1).indexOf(':') + 2)
+    messageText = escapeHTML(messageText)
 
     new ChatMessage(username, messageText)
   }
 }
 
 class TwitchAPI(twitchBot: ActorRef) extends Actor {
-
+  var IsPriesthere:Boolean = false
   setup()
 
   def setup(): Unit = {
@@ -31,19 +40,8 @@ class TwitchAPI(twitchBot: ActorRef) extends Actor {
             sender() ! "PONG :tmi.twitch.tv"
           } else if (rawMessage.contains("PRIVMSG")) {
             val message = TwitchAPI.parseChatMessage(rawMessage)
-            checkForBotCommands(message)
-            // sender() ! "PRIVMSG #hartloff :" + "Hello " + message.username + "! Thank you for saying \"" + message.messageText + "\""
-          }else if (rawMessage.contains("USERSTATE")){
-            val messageUsername:List[String] = rawMessage.split(";").toList
-            var placeholder:String = ""
-            val Recollecting= for (information <- messageUsername if information.contains("display-name")) placeholder = information.split("=")(1)
-            if(placeholder.toLowerCase().contains("priest")){
-              sender() !"PRIVMSG #hartloff :" + messageUsername + " has has arrived"
-
-              //your welcome priest
-              //This is a joke pull request but I will love to see priest reaction
-              //I have no idea if this works or not it should work base on my understanding of how this bot is working as
-            }
+            checkForBotCommands(message,this)
+          }else{
 
           }
       }
@@ -52,7 +50,16 @@ class TwitchAPI(twitchBot: ActorRef) extends Actor {
     val client = WebsocketClient[String](Uri("wss://irc-ws.chat.twitch.tv:443"), handler)
     val socket = client.open()
 
-    socket ! "PASS oauth:???"
+    val twitchOauthToken = sys.env("TWITCH_OAUTH")
+
+/*
+    Extra twitch stuff
+    socket ! "CAP REQ :twitch.tv/membership" https://dev.twitch.tv/docs/irc/membership
+    socket ! "CAP REQ :twitch.tv/commands" https://dev.twitch.tv/docs/irc/commands
+    socket ! "CAP REQ :twitch.tv/tags" https://dev.twitch.tv/docs/irc/tags
+*/
+
+    socket ! "PASS " + twitchOauthToken
     socket ! "NICK Botloff"
     socket ! "JOIN #hartloff"
   }
@@ -60,7 +67,6 @@ class TwitchAPI(twitchBot: ActorRef) extends Actor {
   override def receive: Receive = {
     case _ =>
   }
-
 
 
   def removeCommandFromMessage(message: String): String = {
@@ -71,7 +77,7 @@ class TwitchAPI(twitchBot: ActorRef) extends Actor {
     }
   }
 
-  def checkForBotCommands(chatMessage: ChatMessage): Unit = {
+  def checkForBotCommands(chatMessage: ChatMessage,web:WebsocketHandler[String]): Unit = {
     val messageText: String = chatMessage.messageText.trim()
 
     if (messageText.toLowerCase().startsWith("!q ") || messageText.toLowerCase().startsWith("!question ")) {
@@ -85,8 +91,13 @@ class TwitchAPI(twitchBot: ActorRef) extends Actor {
       )
     } else if (messageText.toLowerCase().startsWith("!a ")) {
       twitchBot ! QuestionAnswered(removeCommandFromMessage(chatMessage.messageText))
-    }else{
-      // no commands
+    }else if(messageText.toLowerCase().startsWith("!h")){
+      val message:String = new Helpcommand(chatMessage.username).outputmessage
+      web.sender() ! message
+    }else if(messageText.startsWith("!")){ //this should always be checked last
+      val message:NoCommandmatched = new NoCommandmatched
+      web.sender() ! message.outputmessage
+      //This might have problem with y2nk's pull request.
     }
   }
 
