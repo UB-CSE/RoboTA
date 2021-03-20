@@ -1,4 +1,4 @@
 target/
 .idea/
 *.iml
-resources/.env
+src/main/resources/.env
