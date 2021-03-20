@@ -3,10 +3,10 @@ package controller
 import akka.actor.{Actor, ActorRef}
 import com.github.andyglow.websocket.{WebsocketClient, WebsocketHandler}
 import com.github.andyglow.websocket.util.Uri
+import controller.TwitchCommands.{NewQuestionCommand, RemoveQuestionCommand, TwitchCommandContract, UpvoteQuestionCommand}
 import model._
 
 object TwitchAPI{
-
   def escapeHTML(input: String): String = {
     input.replace("&", "&amp;")
       .replace("<", "&lt;")
@@ -27,8 +27,13 @@ object TwitchAPI{
 }
 
 class TwitchAPI(twitchBot: ActorRef) extends Actor {
-
   setup()
+
+  var loadedCommandList: List[TwitchCommandContract] = List(
+    new NewQuestionCommand(),
+    new RemoveQuestionCommand(),
+    new UpvoteQuestionCommand()
+  )
 
   def setup(): Unit = {
     val handler = new WebsocketHandler[String] {
@@ -63,8 +68,8 @@ class TwitchAPI(twitchBot: ActorRef) extends Actor {
     val twitchOauthToken = sys.env("TWITCH_OAUTH")
 
     socket ! "PASS " + twitchOauthToken
-    socket ! "NICK Botloff"
-    socket ! "JOIN #hartloff"
+    socket ! "NICK " + sys.env("TWITCH_BOT_NICKNAME")
+    socket ! "JOIN #" + sys.env("TWITCH_CHANNEL_NAME")
   }
 
   override def receive: Receive = {
@@ -72,32 +77,11 @@ class TwitchAPI(twitchBot: ActorRef) extends Actor {
   }
 
 
-
-  def removeCommandFromMessage(message: String): String = {
-    if (message.indexOf(' ') < (message.length - 1)) {
-      message.trim().substring(message.indexOf(' ') + 1).trim()
-    } else {
-      ""
-    }
-  }
-
   def checkForBotCommands(chatMessage: ChatMessage): Unit = {
-    val messageText: String = chatMessage.messageText.trim()
-
-    if (messageText.toLowerCase().startsWith("!q ") || messageText.toLowerCase().startsWith("!question ")) {
-      twitchBot ! NewQuestion("",
-        removeCommandFromMessage(chatMessage.messageText),
-        chatMessage.username)
-    } else if (messageText.toLowerCase().startsWith("!u ")) {
-      twitchBot ! Upvote(
-        removeCommandFromMessage(chatMessage.messageText),
-        chatMessage.username
-      )
-    } else if (messageText.toLowerCase().startsWith("!a ")) {
-      twitchBot ! QuestionAnswered(removeCommandFromMessage(chatMessage.messageText))
-    }else{
-      // no commands
+    for (command <- loadedCommandList) {
+      if (command.matchCommand(chatMessage)) {
+        command.executeCommand(chatMessage, twitchBot)
+      }
     }
   }
-
 }

@@ -198,6 +198,13 @@
                 </executions>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>resources</directory>
+
+                <targetPath>resources/.env</targetPath>
+            </resource>
+        </resources>
     </build>
 
 </project>
