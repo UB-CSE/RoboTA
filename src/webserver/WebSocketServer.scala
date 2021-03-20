@@ -9,7 +9,12 @@ class WebSocketServer extends Actor{
 
   val config: Configuration = new Configuration {
     setHostname("0.0.0.0")
-    setPort(8082)
+
+    if (sys.env("WEBSOCKET_LISTEN") != "" && sys.env("WEBSOCKET_LISTEN").toInt > 0) {
+      setPort(sys.env("WEBSOCKET_LISTEN").toInt)
+    } else {
+      setPort(8082)
+    }
   }
 
   val server: SocketIOServer = new SocketIOServer(config)
