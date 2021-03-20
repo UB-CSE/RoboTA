@@ -1,8 +1,8 @@
-<div align="center">
+<h1 align="center">
 
-#RoboTA
+RoboTA
 
-</div>
+</h1>
 
 
 ### Setup Guide
