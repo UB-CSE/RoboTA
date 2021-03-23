@@ -17,13 +17,14 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - name: Setup Maven
-        # You may pin to the exact commit or the version.
-        # uses: stCarolas/setup-maven@1d56b37995622db66cce1214d81014b09807fb5a
-        uses: stCarolas/setup-maven@v4
+      - name: Restore Maven cache
+        uses: skjolber/maven-cache-github-action@v1
         with:
-          # Version Spec of the version to use.  Examples: 10.x, 10.15.1, >=10.15.0
-          maven-version: 3.5.4
-      - name: Run tests
+          step: restore
+      - name: Run scalatest with Maven
         run: mvn test
+      - name: Save Maven cache
+        uses: skjolber/maven-cache-github-action@v1
+        with:
+          step: save
 
