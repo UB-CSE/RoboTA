@@ -3,11 +3,10 @@ package controller
 import akka.actor.{Actor, ActorRef}
 import com.github.andyglow.websocket.{WebsocketClient, WebsocketHandler}
 import com.github.andyglow.websocket.util.Uri
+import controller.TwitchCommands.{NewQuestionCommand, RemoveQuestionCommand, TwitchCommandContract, UpvoteQuestionCommand}
 import model._
-import model.command._
 
 object TwitchAPI{
-
   def escapeHTML(input: String): String = {
     input.replace("&", "&amp;")
       .replace("<", "&lt;")
@@ -28,8 +27,13 @@ object TwitchAPI{
 }
 
 class TwitchAPI(twitchBot: ActorRef) extends Actor {
-  var IsPriesthere:Boolean = false
   setup()
+
+  var loadedCommandList: List[TwitchCommandContract] = List(
+    new NewQuestionCommand(),
+    new RemoveQuestionCommand(),
+    new UpvoteQuestionCommand()
+  )
 
   def setup(): Unit = {
     val handler = new WebsocketHandler[String] {
@@ -40,9 +44,12 @@ class TwitchAPI(twitchBot: ActorRef) extends Actor {
             sender() ! "PONG :tmi.twitch.tv"
           } else if (rawMessage.contains("PRIVMSG")) {
             val message = TwitchAPI.parseChatMessage(rawMessage)
-            checkForBotCommands(message,this)
+            checkForBotCommands(message)
+            // sender() ! "PRIVMSG #hartloff :" + "Hello " + message.username + "! Thank you for saying \"" + message.messageText + "\""
+          }else if(rawMessage.startsWith("!")){
+            sender() ! "Sorry that is not a valid command. Please do !h or !help for more option"
           }else{
-
+          //do noting?
           }
       }
     }
@@ -52,16 +59,9 @@ class TwitchAPI(twitchBot: ActorRef) extends Actor {
 
     val twitchOauthToken = sys.env("TWITCH_OAUTH")
 
-/*
-    Extra twitch stuff
-    socket ! "CAP REQ :twitch.tv/membership" https://dev.twitch.tv/docs/irc/membership
-    socket ! "CAP REQ :twitch.tv/commands" https://dev.twitch.tv/docs/irc/commands
-    socket ! "CAP REQ :twitch.tv/tags" https://dev.twitch.tv/docs/irc/tags
-*/
-
     socket ! "PASS " + twitchOauthToken
-    socket ! "NICK Botloff"
-    socket ! "JOIN #hartloff"
+    socket ! "NICK " + sys.env("TWITCH_BOT_NICKNAME")
+    socket ! "JOIN #" + sys.env("TWITCH_CHANNEL_NAME")
   }
 
   override def receive: Receive = {
@@ -69,36 +69,11 @@ class TwitchAPI(twitchBot: ActorRef) extends Actor {
   }
 
 
-  def removeCommandFromMessage(message: String): String = {
-    if (message.indexOf(' ') < (message.length - 1)) {
-      message.trim().substring(message.indexOf(' ') + 1).trim()
-    } else {
-      ""
+  def checkForBotCommands(chatMessage: ChatMessage): Unit = {
+    for (command <- loadedCommandList) {
+      if (command.matchCommand(chatMessage)) {
+        command.executeCommand(chatMessage, twitchBot)
+      }
     }
   }
-
-  def checkForBotCommands(chatMessage: ChatMessage,web:WebsocketHandler[String]): Unit = {
-    val messageText: String = chatMessage.messageText.trim()
-
-    if (messageText.toLowerCase().startsWith("!q ") || messageText.toLowerCase().startsWith("!question ")) {
-      twitchBot ! NewQuestion("",
-        removeCommandFromMessage(chatMessage.messageText),
-        chatMessage.username)
-    } else if (messageText.toLowerCase().startsWith("!u ")) {
-      twitchBot ! Upvote(
-        removeCommandFromMessage(chatMessage.messageText),
-        chatMessage.username
-      )
-    } else if (messageText.toLowerCase().startsWith("!a ")) {
-      twitchBot ! QuestionAnswered(removeCommandFromMessage(chatMessage.messageText))
-    }else if(messageText.toLowerCase().startsWith("!h")){
-      val message:String = new Helpcommand(chatMessage.username).outputmessage
-      web.sender() ! message
-    }else if(messageText.startsWith("!")){ //this should always be checked last
-      val message:NoCommandmatched = new NoCommandmatched
-      web.sender() ! message.outputmessage
-      //This might have problem with y2nk's pull request.
-    }
-  }
-
 }
