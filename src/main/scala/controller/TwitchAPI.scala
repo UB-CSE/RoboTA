@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorRef}
 import com.github.andyglow.websocket.{WebsocketClient, WebsocketHandler}
 import com.github.andyglow.websocket.util.Uri
 import controller.TwitchCommands.{NewQuestionCommand, RemoveQuestionCommand, TwitchCommandContract, UpvoteQuestionCommand}
-import model._
+//import model._
 
 object TwitchAPI{
   def escapeHTML(input: String): String = {
