@@ -3,12 +3,16 @@ package webserver
 import akka.actor.{ActorSystem, Props, typed}
 import akka.actor.typed.scaladsl.adapter.ClassicActorSystemOps
 import controller.TwitchAPI
-import model.{MySQLDatabase, TestDatabase, TwitchBot}
+import model.TwitchBotDatabase.{MySQLDatabase, TestDatabase}
+import model.TwitchBot
+import helpers.dotenv.Dotenv
 
 
 object Main {
 
   def main(args: Array[String]): Unit = {
+    Dotenv.loadEnv()
+
     val system: ActorSystem = ActorSystem("Web_System")
 
     // Use to comply with the new akka actor API which is required by akka.http

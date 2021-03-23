@@ -23,7 +23,14 @@ class WebServer(implicit val system: ActorSystem[Nothing]) {
 
   val router: Route = concat(indexRouter, staticRouter)
 
-  val bindingFuture: Future[Http.ServerBinding] = Http().newServerAt("0.0.0.0", 8081).bind(router)
+  println("test", sys.env("WEB_LISTEN").toInt)
+
+  val bindingFuture: Future[Http.ServerBinding] =
+    if (sys.env("WEB_LISTEN") != "" && sys.env("WEB_LISTEN").toInt > 0) {
+      Http().newServerAt("0.0.0.0", sys.env("WEB_LISTEN").toInt).bind(router)
+    } else {
+      Http().newServerAt("0.0.0.0", 8081).bind(router)
+    }
 
   //    bindingFuture.flatMap(_.unbind())(executionContext).onComplete(_ -> system.terminate())(executionContext)
 }

@@ -1,8 +1,9 @@
 package model
 
 import akka.actor.{Actor, ActorRef}
+import model.TwitchBotDatabase.{TwitchBotContract, TestDatabase}
 
-class TwitchBot(webSocketServer: ActorRef, database: Database = new TestDatabase) extends Actor {
+class TwitchBot(webSocketServer: ActorRef, database: TwitchBotContract = new TestDatabase) extends Actor {
 
   /**
    * Called when a user enters "!q <question_text>" in the chat
