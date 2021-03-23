@@ -2,7 +2,7 @@ name: Scala Test CI
 
 on:
   push:
-    branches: [ master, develope, ci-unit-testing ]
+    branches: [ master, develope, ci-unit-testings ]
   pull_request:
     branches: [ master, develope ]
 
