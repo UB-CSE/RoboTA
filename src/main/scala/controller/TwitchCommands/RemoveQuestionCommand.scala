@@ -1,10 +1,10 @@
 package controller.TwitchCommands
 
 import akka.actor.ActorRef
-import controller.ChatMessage
+import controller.{ChatMessage, TwitchAPI}
 import model.{QuestionAnswered, Upvote}
 
-class RemoveQuestionCommand extends TwitchCommandContract {
+class RemoveQuestionCommand(_twitchAPI: TwitchAPI) extends TwitchCommandContract(_twitchAPI) {
   override def commandPrefixes: List[String] = {
     List(
       "!a ", "!answer "

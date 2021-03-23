@@ -3,7 +3,7 @@ package controller.TwitchCommands
 import akka.actor.ActorRef
 import controller.{ChatMessage, TwitchAPI}
 
-abstract class TwitchCommandContract {
+abstract class TwitchCommandContract(var twitchAPI: TwitchAPI) {
   def commandPrefixes(): List[String] = {
     List()
   }
