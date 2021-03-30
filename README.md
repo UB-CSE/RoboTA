@@ -1,9 +1,6 @@
-<h1 align="center">
+<h1 align="center">RoboTA</h1>
 
-RoboTA
-
-</h1>
-
+[![Scala Test CI](https://github.com/UB-CSE/RoboTA/actions/workflows/scala-test.yml/badge.svg)](https://github.com/UB-CSE/RoboTA/actions/workflows/scala-test.yml)
 
 ### Setup Guide
 

@@ -1,0 +1,30 @@
+name: Scala Test CI
+
+on:
+  push:
+    branches: [ master, develop, ci-unit-testings ]
+  pull_request:
+    branches: [ master, develop ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Restore Maven cache
+        uses: skjolber/maven-cache-github-action@v1
+        with:
+          step: restore
+      - name: Run scalatest with Maven
+        run: mvn test
+      - name: Save Maven cache
+        uses: skjolber/maven-cache-github-action@v1
+        with:
+          step: save
+
