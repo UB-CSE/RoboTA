@@ -1,10 +1,10 @@
 package controller.TwitchCommands
 
 import akka.actor.ActorRef
-import controller.ChatMessage
+import controller.{ChatMessage, TwitchAPI}
 import model.{NewQuestion, Upvote}
 
-class UpvoteQuestionCommand extends TwitchCommandContract {
+class UpvoteQuestionCommand(_twitchAPI: TwitchAPI) extends TwitchCommandContract(_twitchAPI) {
   override def commandPrefixes: List[String] = {
     List(
       "!u ", "!upvote "

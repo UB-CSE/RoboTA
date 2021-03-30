@@ -1,10 +1,11 @@
 package controller
 
 import akka.actor.{Actor, ActorRef}
-import com.github.andyglow.websocket.{WebsocketClient, WebsocketHandler}
+import com.github.andyglow.websocket.{Websocket, WebsocketClient, WebsocketHandler}
 import com.github.andyglow.websocket.util.Uri
-import controller.TwitchCommands.{NewQuestionCommand, RemoveQuestionCommand, TwitchCommandContract, UpvoteQuestionCommand}
-import model._
+import config.TwitchConfiguration
+import controller.TwitchCommands.{HelpCommand, NewQuestionCommand, PriestChecker, RemoveQuestionCommand, TwitchCommandContract, UpvoteQuestionCommand}
+//import model._
 
 object TwitchAPI{
   def escapeHTML(input: String): String = {
@@ -27,50 +28,47 @@ object TwitchAPI{
 }
 
 class TwitchAPI(twitchBot: ActorRef) extends Actor {
-  setup()
-
+  /* properties */
+  var isPriestHere:Boolean = false
   var loadedCommandList: List[TwitchCommandContract] = List(
-    new NewQuestionCommand(),
-    new RemoveQuestionCommand(),
-    new UpvoteQuestionCommand()
+    new NewQuestionCommand(this),
+    new RemoveQuestionCommand(this),
+    new PriestChecker(this),
+    new HelpCommand(this),
+    new UpvoteQuestionCommand(this)
   )
 
-  def setup(): Unit = {
-    val handler = new WebsocketHandler[String] {
-      def receive = {
-        case rawMessage: String =>
-          println(rawMessage)
-          if (rawMessage.startsWith("PING")) {
-            sender() ! "PONG :tmi.twitch.tv"
-          } else if (rawMessage.contains("PRIVMSG")) {
-            val message = TwitchAPI.parseChatMessage(rawMessage)
-            checkForBotCommands(message)
-            // sender() ! "PRIVMSG #hartloff :" + "Hello " + message.username + "! Thank you for saying \"" + message.messageText + "\""
-          }else if (rawMessage.contains("USERSTATE")){
-            val messageUsername:List[String] = rawMessage.split(";").toList
-            var placeholder:String = ""
-            val Recollecting= for (information <- messageUsername if information.contains("display-name")) placeholder = information.split("=")(1)
-            if(placeholder.toLowerCase().contains("priest")){
-              sender() !"PRIVMSG #hartloff :" + messageUsername + " has has arrived"
+  /* prepare to establish ws connection with Twitch */
+  val handler: WebsocketHandler[String] = new WebsocketHandler[String] {
+    def receive = {
+      case rawMessage: String =>
+        println(rawMessage)
+        if (rawMessage.startsWith("PING")) {
+          sender() ! "PONG :tmi.twitch.tv"
+        } else if (rawMessage.contains("PRIVMSG")) {
+          val message = TwitchAPI.parseChatMessage(rawMessage)
+          checkForBotCommands(message)
+        }else{
 
-              //your welcome priest
-              //This is a joke pull request but I will love to see priest reaction
-              //I have no idea if this works or not it should work base on my understanding of how this bot is working as
-            }
-
-          }
-      }
+        }
     }
-
-    val client = WebsocketClient[String](Uri("wss://irc-ws.chat.twitch.tv:443"), handler)
-    val socket = client.open()
-
-    val twitchOauthToken = sys.env("TWITCH_OAUTH")
-
-    socket ! "PASS " + twitchOauthToken
-    socket ! "NICK " + sys.env("TWITCH_BOT_NICKNAME")
-    socket ! "JOIN #" + sys.env("TWITCH_CHANNEL_NAME")
   }
+  /* establish ws connection with Twitch */
+  val client: WebsocketClient[String] = WebsocketClient[String](Uri("wss://irc-ws.chat.twitch.tv:443"), handler)
+  val socket: Websocket = client.open()
+
+  /* prepare to do authentication for bot to login */
+  val twitchOauthToken: String = sys.env("TWITCH_OAUTH")
+
+  socket ! "PASS " + twitchOauthToken
+  socket ! "NICK " + sys.env("TWITCH_BOT_NICKNAME")
+  socket ! "JOIN #" + sys.env("TWITCH_CHANNEL_NAME")
+  /*
+      Extra twitch stuff
+      socket ! "CAP REQ :twitch.tv/membership" https://dev.twitch.tv/docs/irc/membership
+      socket ! "CAP REQ :twitch.tv/commands" https://dev.twitch.tv/docs/irc/commands
+      socket ! "CAP REQ :twitch.tv/tags" https://dev.twitch.tv/docs/irc/tags
+  */
 
   override def receive: Receive = {
     case _ =>
@@ -83,5 +81,9 @@ class TwitchAPI(twitchBot: ActorRef) extends Actor {
         command.executeCommand(chatMessage, twitchBot)
       }
     }
+  }
+
+  def sendRawMessageInChat(rawMessage: String): Unit = {
+    socket ! (TwitchConfiguration.senderPrefix + rawMessage)
   }
 }

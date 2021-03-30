@@ -19,7 +19,10 @@ RoboTA
       For example,
       if you need to test with your bot account, you need
       to revise the TWITCH_OAUTH field to your bot account's
-      oauth token
+      oauth token 
+      
+   -Twitch offical irc & chatbot <a href ="https://dev.twitch.tv/docs/irc/guide">guide<a>
+   
 
 4. Build it.
 
