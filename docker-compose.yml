@@ -14,7 +14,54 @@ services:
   app:
     build: .
     environment:
-      WAIT_HOSTS: mysql:3306
+      # ===============================================
+      # TwitchBot Account Oauth Token
+      #
+      # Twitch Guide to get Oauth Token:
+      # https://dev.twitch.tv/docs/irc/guide
+      # Or use this Twitch Chat OAuth Password Generator:
+      # https://twitchapps.com/tmi/
+      # Format: oauth:<token>
+      # Example: oauth:asdasdasdasdasdas
+      # Or set the $TWITCH_OAUTH environment variable on the host to "oauth:<token>" and put ${TWITCH_OAUTH} here
+      # ===============================================
+      TWITCH_OAUTH: ${TWITCH_OAUTH}
+
+      # ===============================================
+      # TwitchBot Nickname
+      # Example: Botloff
+      # ===============================================
+      TWITCH_BOT_NICKNAME: 'Botloff'
+
+      # ===============================================
+      # TwitchBot Channel Name
+      # Example: hartloff
+      # ===============================================
+      TWITCH_CHANNEL_NAME: 'hartloff'
+
+      # ===============================================
+      # WebSocket Port
+      #
+      # Default: 8082
+      # ===============================================
+      WEBSOCKET_LISTEN: 8082
+      # ===============================================
+      # Web Service Port
+      #
+      # Default: 8082
+      # ===============================================
+      WEB_LISTEN: 8081
+
+      # ===============================================
+      # MySQL DB Url
+      #
+      # Default: jdbc:mysql://localhost/twitchbot?autoReconnect=true&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+      # ===============================================
+      MYSQL_DB_URL: 'jdbc:mysql://localhost/twitchbot?autoReconnect=true&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC'
+
+      # ===============================================
+      # MySQL Username & Password
+      # ===============================================
       DB_USERNAME: 'sqluser'
       DB_PASSWORD: 'changeme'
-      TWITCH_OAUTH: 'oauth:____'
+      WAIT_HOSTS: mysql:3306
