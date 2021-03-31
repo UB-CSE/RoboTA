@@ -11,7 +11,7 @@ import helpers.dotenv.Dotenv
 object Main {
 
   def main(args: Array[String]): Unit = {
-    Dotenv.loadEnv()
+//    Dotenv.loadEnv()
 
     val system: ActorSystem = ActorSystem("Web_System")
 
