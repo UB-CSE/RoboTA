@@ -1,11 +1,12 @@
 package webserver
 
-import akka.actor.Actor
+import akka.actor.{Actor, ActorRef}
 import com.corundumstudio.socketio.listener.ConnectListener
 import com.corundumstudio.socketio.{Configuration, SocketIOClient, SocketIOServer}
-import model.Question
+import model.TwitchBotDatabase.TwitchBotContract
+import model.{GetQuestions, Question}
 
-class WebSocketServer extends Actor{
+class WebSocketServer(val database: TwitchBotContract) extends Actor{
 
   val config: Configuration = new Configuration {
     setHostname("0.0.0.0")
@@ -21,7 +22,7 @@ class WebSocketServer extends Actor{
 
   val server: SocketIOServer = new SocketIOServer(config)
 
-  server.addConnectListener(new ConnectionListener())
+  server.addConnectListener(new ConnectionListener(database))
 
   server.start()
 
@@ -41,9 +42,16 @@ class WebSocketServer extends Actor{
 //  }
 //}
 
-class ConnectionListener() extends ConnectListener {
+class ConnectionListener(val database: TwitchBotContract) extends ConnectListener {
   override def onConnect(client: SocketIOClient): Unit = {
+    val questions: List[Question] = database.unansweredQuestions().sortBy(_.numberOfUpvotes()).reverse
+
     println("Connected: " + client)
+
+    client.sendEvent(
+      "messages",
+      questions.foldLeft("")((agg: String, question: Question) => agg + "<br/>" + question.toString)
+    )
   }
 }
 

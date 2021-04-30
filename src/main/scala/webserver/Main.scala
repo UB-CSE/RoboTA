@@ -6,9 +6,13 @@ import controller.TwitchAPI
 import model.TwitchBotDatabase.{MySQLDatabase, TestDatabase}
 import model.TwitchBot
 import helpers.dotenv.Dotenv
+import akka.actor.ActorRef
 
 
 object Main {
+  var webSocketServer: ActorRef = null
+  var twitchBotActor: ActorRef = null
+  var twitchAPIActor: ActorRef = null
 
   def main(args: Array[String]): Unit = {
 //    Dotenv.loadEnv()
@@ -18,9 +22,11 @@ object Main {
     // Use to comply with the new akka actor API which is required by akka.http
     implicit val shittySystem: typed.ActorSystem[Nothing] = system.toTyped
 
-    val webSocketServer = system.actorOf(Props(classOf[WebSocketServer]))
-    val twitchBotActor = system.actorOf(Props(classOf[TwitchBot], webSocketServer, new TestDatabase))
-    val twitchAPIActor = system.actorOf(Props(classOf[TwitchAPI], twitchBotActor))
+    val database = new TestDatabase
+
+    webSocketServer = system.actorOf(Props(classOf[WebSocketServer], database))
+    twitchBotActor = system.actorOf(Props(classOf[TwitchBot], webSocketServer, database))
+    twitchAPIActor = system.actorOf(Props(classOf[TwitchAPI], twitchBotActor))
 
     new WebServer()
 
