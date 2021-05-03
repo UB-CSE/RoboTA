@@ -3,7 +3,7 @@ package webserver
 import akka.actor.Actor
 import com.corundumstudio.socketio.listener.ConnectListener
 import com.corundumstudio.socketio.{Configuration, SocketIOClient, SocketIOServer}
-import model.Question
+import model.{Question, QuestionListFunctions}
 
 class WebSocketServer extends Actor{
 
@@ -29,7 +29,7 @@ class WebSocketServer extends Actor{
     case questions: List[Question] =>
       server.getBroadcastOperations.sendEvent(
         "messages",
-        questions.foldLeft("")((agg: String, question: Question) => agg + "<br/>" + question.toString)
+        QuestionListFunctions.sortByUpvotes(questions).foldLeft("")((agg: String, question: Question) => agg + "<hr/>" + question.toString)
       )
   }
 }
