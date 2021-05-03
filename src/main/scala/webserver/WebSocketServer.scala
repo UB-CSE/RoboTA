@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorRef}
 import com.corundumstudio.socketio.listener.ConnectListener
 import com.corundumstudio.socketio.{Configuration, SocketIOClient, SocketIOServer}
 import model.TwitchBotDatabase.TwitchBotContract
-import model.{GetQuestions, Question}
+import model.{GetQuestions, Question, QuestionListFunctions}
 
 class WebSocketServer(val database: TwitchBotContract) extends Actor{
 
@@ -30,7 +30,7 @@ class WebSocketServer(val database: TwitchBotContract) extends Actor{
     case questions: List[Question] =>
       server.getBroadcastOperations.sendEvent(
         "messages",
-        questions.foldLeft("")((agg: String, question: Question) => agg + "<br/>" + question.toString)
+        QuestionListFunctions.sortByUpvotes(questions).foldLeft("")((agg: String, question: Question) => agg + "<hr/>" + question.toString)
       )
   }
 }
