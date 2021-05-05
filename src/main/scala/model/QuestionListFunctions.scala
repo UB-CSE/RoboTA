@@ -4,14 +4,7 @@ object QuestionListFunctions {
 
   def percentageAnswered(qList: List[Question]): Double ={
     val boolList = qList.map(_.answered)
-    Math.floor(boolList.count(_ == true).toDouble / boolList.length * 100.0)
+    Math.floor(boolList.count(_ == true).toDouble / boolList.length * 10000.0) / 100
   }
-
-  def sortByUpvotes(qList: List[Question]): List[Question] ={
-    val upvoteList = qList.sortBy(_.numberOfUpvotes()).reverse
-    upvoteList
-  }
-
-
 
 }
