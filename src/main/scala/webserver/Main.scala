@@ -10,12 +10,9 @@ import akka.actor.ActorRef
 
 
 object Main {
-  var webSocketServer: ActorRef = null
-  var twitchBotActor: ActorRef = null
-  var twitchAPIActor: ActorRef = null
 
   def main(args: Array[String]): Unit = {
-//    Dotenv.loadEnv()
+    Dotenv.loadEnv()
 
     val system: ActorSystem = ActorSystem("Web_System")
 
@@ -24,9 +21,9 @@ object Main {
 
     val database = new TestDatabase
 
-    webSocketServer = system.actorOf(Props(classOf[WebSocketServer], database))
-    twitchBotActor = system.actorOf(Props(classOf[TwitchBot], webSocketServer, database))
-    twitchAPIActor = system.actorOf(Props(classOf[TwitchAPI], twitchBotActor))
+    val webSocketServer = system.actorOf(Props(classOf[WebSocketServer]))
+    val twitchBotActor = system.actorOf(Props(classOf[TwitchBot], webSocketServer, database))
+    val twitchAPIActor = system.actorOf(Props(classOf[TwitchAPI], twitchBotActor))
 
     new WebServer()
 
