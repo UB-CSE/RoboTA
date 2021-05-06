@@ -1,11 +1,12 @@
 package webserver
 
-import akka.actor.Actor
+import akka.actor.{Actor, ActorRef}
 import com.corundumstudio.socketio.listener.ConnectListener
 import com.corundumstudio.socketio.{Configuration, SocketIOClient, SocketIOServer}
-import model.Question
+import model.TwitchBotDatabase.TwitchBotContract
+import model.{GetQuestions, Question, QuestionListFunctions}
 
-class WebSocketServer extends Actor{
+class WebSocketServer() extends Actor{
 
   val config: Configuration = new Configuration {
     setHostname("0.0.0.0")
@@ -21,29 +22,32 @@ class WebSocketServer extends Actor{
 
   val server: SocketIOServer = new SocketIOServer(config)
 
-  server.addConnectListener(new ConnectionListener())
+  server.addConnectListener(new ConnectionListener(this))
 
   server.start()
 
+  var cachedMessage: String = ""
+
   override def receive: Receive = {
     case questions: List[Question] =>
+      cachedMessage = questions.foldLeft("")((agg: String, question: Question) => agg + "<hr/>" + question.toString)
       server.getBroadcastOperations.sendEvent(
         "messages",
-        questions.foldLeft("")((agg: String, question: Question) => agg + "<br/>" + question.toString)
+        cachedMessage
       )
+
   }
 }
 
-//object WebSocketServer{
-//
-//  def main(args: Array[String]): Unit = {
-//    new WebSocketServer()
-//  }
-//}
-
-class ConnectionListener() extends ConnectListener {
+class ConnectionListener(webSocketServer: WebSocketServer) extends ConnectListener {
   override def onConnect(client: SocketIOClient): Unit = {
+
     println("Connected: " + client)
+
+    client.sendEvent(
+      "messages",
+      webSocketServer.cachedMessage
+    )
   }
 }
 

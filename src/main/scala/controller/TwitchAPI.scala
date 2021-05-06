@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorRef}
 import com.github.andyglow.websocket.{Websocket, WebsocketClient, WebsocketHandler}
 import com.github.andyglow.websocket.util.Uri
 import config.TwitchConfiguration
-import controller.TwitchCommands.{HelpCommand, NewQuestionCommand, PriestChecker, RemoveQuestionCommand, TwitchCommandContract, UpvoteQuestionCommand}
+import controller.TwitchCommands.{HelpCommand, NewQuestionCommand, PriestChecker, PriestCommand, RemoveQuestionCommand, TwitchCommandContract, UpvoteQuestionCommand}
 //import model._
 
 object TwitchAPI{
@@ -34,6 +34,7 @@ class TwitchAPI(twitchBot: ActorRef) extends Actor {
     new NewQuestionCommand(this),
     new RemoveQuestionCommand(this),
     new PriestChecker(this),
+    new PriestCommand(this),
     new HelpCommand(this),
     new UpvoteQuestionCommand(this)
   )

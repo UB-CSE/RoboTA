@@ -18,6 +18,7 @@ object Dotenv {
       }
     }
 
+    println("[Info] Success to load .env: ")
     for (line <- envLines) {
       // skip the lines which are commented out
       if (line.trim != "" && !line.trim.startsWith("#")) {
